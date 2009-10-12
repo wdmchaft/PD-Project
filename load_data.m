@@ -1,13 +1,15 @@
-%cd "/home/adriaan/Homework/EECE 496/Starting Data/Pilot03";
-Data = 'Pilot03';
-Platform = load(strcat(Data,'\',Data,'_Platform_Position_fwdSHRT.txt'));
-Knee = load(strcat(Data,'\', Data, '_Knee_Angles_fwdSHRT.txt'));
-Ankle = load(strcat(Data, '\', Data, '_Ankle_Angles_fwdSHRT.txt'));
-Hip = load(strcat(Data, '\', Data, '_Hip_Angles_fwdSHRT.txt'));
-Shoulder = load(strcat(Data, '\', Data, '_Shoulder_Angles_fwdSHRT.txt'));
-Trunk = load(strcat(Data, '\', Data, '_Trunk_Angles_fwdSHRT.txt'));
-Elbow = load(strcat(Data, '\', Data, '_Elbow_Angles_fwdSHRT.txt'));
-Neck = load(strcat(Data, '\', Data, '_Neck_Angles_fwdSHRT.txt'));
+% These are the parameters to be set before running...
+Subject = 'Pilot03';
+Trial   = '4';
+
+Platform = load([Subject,'\',Subject,'_Platform_Position_fwdSHRT.txt']);
+Knee = load([Subject,'\', Subject, '_Knee_Angles_fwdSHRT.txt']);
+Ankle = load([Subject, '\', Subject, '_Ankle_Angles_fwdSHRT.txt']);
+Hip = load([Subject, '\', Subject, '_Hip_Angles_fwdSHRT.txt']);
+Shoulder = load([Subject, '\', Subject, '_Shoulder_Angles_fwdSHRT.txt']);
+Trunk = load([Subject, '\', Subject, '_Trunk_Angles_fwdSHRT.txt']);
+Elbow = load([Subject, '\', Subject, '_Elbow_Angles_fwdSHRT.txt']);
+Neck = load([Subject, '\', Subject, '_Neck_Angles_fwdSHRT.txt']);
 
 % note same time vector is the first column of all data sets
 % number of trials depends on trial type:
@@ -16,23 +18,16 @@ Neck = load(strcat(Data, '\', Data, '_Neck_Angles_fwdSHRT.txt'));
 % bwdLONG = fwdLONG = 5 for P3
 
 time = Ankle(:,1);
-Joints.Trial1 = [Ankle(:,2) Elbow(:,2) Hip(:,2) Knee(:,2) Neck(:,2) Shoulder(:,2) Trunk(:,2)];
-Joints.Trial2 = [Ankle(:,3) Elbow(:,3) Hip(:,3) Knee(:,3) Neck(:,3) Shoulder(:,3) Trunk(:,3)];
-Joints.Trial3 = [Ankle(:,4) Elbow(:,4) Hip(:,4) Knee(:,4) Neck(:,4) Shoulder(:,4) Trunk(:,4)];
-Joints.Trial4 = [Ankle(:,5) Elbow(:,5) Hip(:,5) Knee(:,5) Neck(:,5) Shoulder(:,5) Trunk(:,5)];
-Joints.Trial5 = [Ankle(:,6) Elbow(:,6) Hip(:,6) Knee(:,6) Neck(:,6) Shoulder(:,6) Trunk(:,6)];
 
-screen_size = get(0, 'ScreenSize')
-% Syntax is [xstart, ystart, width, height]. For some reason, it still
-% overshoots...
-figure('Position', [4 screen_size(4)/3-75 2*screen_size(3)/3 2*screen_size(4)/3]);
+Trial_num = eval(Trial);
+Joints.Trial = [Ankle(:,Trial_num+1) Elbow(:,Trial_num+1) Hip(:,Trial_num+1) Knee(:,Trial_num+1) Neck(:,Trial_num+1) Shoulder(:,Trial_num+1) Trunk(:,Trial_num+1)];
+
+screen_size = get(0, 'ScreenSize');
+% Syntax for position is [xstart, ystart, width, height]. For some reason, it still overshoots...
+figure('Name', ['SUBJECT: ', Subject, ' TRIAL: ', Trial], 'NumberTitle', 'off', 'Position', [4 screen_size(4)/3-75 2*screen_size(3)/3 2*screen_size(4)/3]);
+
 subplot(2,1,1);
-plot(time, Joints.Trial2); legend('Ankle','Elbow','Hip','Knee','Neck','Shoulder','Trunk');
+plot(time, Joints.Trial);
+legend('Ankle','Elbow','Hip','Knee','Neck','Shoulder','Trunk');
 subplot(2,1,2);
 plot(time, Platform(:,2)); legend('Platform Position');
-%figure();
-%plot(time, Joints.Trial2); legend('Ankle','Elbow','Hip','Knee','Neck','Shoulder','Trunk');
-%figure();
-%plot(time, Joints.Trial3); legend('Ankle','Elbow','Hip','Knee','Neck','Shoulder','Trunk');
-%figure();
-%plot(time, Joints.Trial4); legend('Ankle','Elbow','Hip','Knee','Neck','Shoulder','Trunk');
