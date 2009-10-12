@@ -1,0 +1,22 @@
+Hello,
+
+Seven sagittal plane relative joint angles have been calculated at 150Hz. Those angles include: ankle, knee, hip (between pelvis and thigh), trunk (between thorax and pelvis),
+neck, shoulder and elbow.  The data are entirely raw (i.e. unfiltered and no interpolation) so you may see missing data points in some trials.  
+
+Each .txt file contains all trials for a particular joint angle for a given trial type and subject.  For example, a single file could contain 6 columns of 
+data with the first being time and the remaining 5 being all trials of shoulder angles during forward long translations for a given subject.  
+The timescale begins 500ms prior to platform translation onset (-500ms) and ends 2 seconds after platform onset.
+
+Within a particular trialtype (i.e. bwdLONG) column numbers represent the same trial across all joint angles such that column #2 in bwdLONG shoulder angle 
+and column #2 in bwdLONG ankle angle represent data from the same trial.  
+
+Each file name contains the subject (i.e. Pilot03), the angle (i.e._Ankle_Angle_) and the trialtype (i.e. BdLgRch).
+
+Trial type legend:
+BdLgRch = backward long translation WITH reach
+FdLgRch = forward long translation WITH reach
+bwdSHRT = backward short translation
+fwdSHRT = forward short translation
+bwdLONG = backward long translation
+fwdLONG = forward long translation
+
