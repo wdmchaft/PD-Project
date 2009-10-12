@@ -1,12 +1,12 @@
-cd "/home/adriaan/Homework/EECE 496/Starting Data/Pilot03";
-Platform = load('Pilot03_Platform_Position_fwdSHRT.txt');
-Knee = load('Pilot03_Knee_Angles_fwdSHRT.txt');
-Ankle = load('Pilot03_Ankle_Angles_fwdSHRT.txt');
-Hip = load('Pilot03_Hip_Angles_fwdSHRT.txt');
-Shoulder = load('Pilot03_Shoulder_Angles_fwdSHRT.txt');
-Trunk = load('Pilot03_Trunk_Angles_fwdSHRT.txt');
-Elbow = load('Pilot03_Elbow_Angles_fwdSHRT.txt');
-Neck = load('Pilot03_Neck_Angles_fwdSHRT.txt');
+%cd "/home/adriaan/Homework/EECE 496/Starting Data/Pilot03";
+Platform = load('Pilot03\Pilot03_Platform_Position_fwdSHRT.txt');
+Knee = load('Pilot03\Pilot03_Knee_Angles_fwdSHRT.txt');
+Ankle = load('Pilot03\Pilot03_Ankle_Angles_fwdSHRT.txt');
+Hip = load('Pilot03\Pilot03_Hip_Angles_fwdSHRT.txt');
+Shoulder = load('Pilot03\Pilot03_Shoulder_Angles_fwdSHRT.txt');
+Trunk = load('Pilot03\Pilot03_Trunk_Angles_fwdSHRT.txt');
+Elbow = load('Pilot03\Pilot03_Elbow_Angles_fwdSHRT.txt');
+Neck = load('Pilot03\Pilot03_Neck_Angles_fwdSHRT.txt');
 
 % note same time vector is the first column of all data sets
 % number of trials depends on trial type:
