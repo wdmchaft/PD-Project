@@ -1,10 +1,10 @@
 % These are the parameters to be set before running...
 Subject  = 'Pilot03';
 Trial    = '2';
-Show     = 'AN';
-Type     = 'fwdSHRT'
+Show     = 'AEHKNST';
+Type     = 'FdLgRch';%'bwdLONG';
 Plot     = 1;
-IDSystem = 1;
+IDSystem = 0;
 
 Order = struct('A', 'Ankle', 'E', 'Elbow', 'H', 'Hip', 'K', 'Knee', 'N', 'Neck', 'S', 'Shoulder', 'T', 'Trunk');
 
@@ -28,10 +28,13 @@ time = Ankle(:,1);
 
 % Goddamn it program flow control is annoying in Matlab...
 include = '';
+leg = 'legend(';
 for i=Show,
     include = [include eval(['Order.' i]) '(:,' Trial '+1) '];
+    leg = [leg '''' eval(['Order.' i]) ''', '];
 end
-Joints.Trial = eval(['[' include ']']);
+in = eval(['[' include ']']);
+leg = [leg(1:size(leg,2)-2) ');'];
 
 if Plot
     screen_size = get(0, 'ScreenSize');
@@ -39,12 +42,24 @@ if Plot
     figure('Name', ['SUBJECT: ', Subject, ' TRIAL: ', Trial, ' TYPE: ', Type], 'NumberTitle', 'off', 'Position', [4 screen_size(4)/3-75 2*screen_size(3)/3 2*screen_size(4)/3]);
 
     subplot(2,1,1);
-    plot(time, Joints.Trial);
-    legend('Ankle','Elbow','Hip','Knee','Neck','Shoulder','Trunk');
+    plot(time, Platform(:,eval(Trial)+1)); legend('Platform Position');
     subplot(2,1,2);
-    plot(time, Platform(:,2)); legend('Platform Position');
+    plot(time, in);
+    eval(leg);
 end
 
 if IDSystem
+    % Create an iddata structure. Format is (output, input, sample time)
+    % This is goddamn convoluted. Take the trial+1'th row of *Platform* for
+    % output, take the trial+1'th row of Order.Ankle (etc) for input.
+    out  = Platform(:,eval(Trial)+1);
+    name = eval(['Order.' Show(1)]);
+    in   = eval([name '(:,' Trial '+1);']);
+    data = iddata(out, in, 1/150);
     
+    % Try dealing with the NaN's using misdata...
+    data1 = misdata(data);
+    
+    figure('Name', ['Comparision of raw with misdata corrected for ' name], 'NumberTitle', 'off', 'Position', [550 screen_size(4)/3-75 2*screen_size(3)/3 2*screen_size(4)/3]);
+    plot(data1);
 end
