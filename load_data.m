@@ -1,10 +1,17 @@
-% These are the parameters to be set before running...
-Subject  = 'Pilot03';
-Trial    = '2';
-Show     = 'AEHKNST';
-Type     = 'FdLgRch';%'bwdLONG';
-Plot     = 1;
-IDSystem = 0;
+function done = load_data( Subject, Trial, Joint_names, ...
+			   Type, Plot, Clean)
+% This function loads the Trial'th trial of Subject and Type, 
+% and examines all of the joints specified by Joints.
+% If Plot is true, then it will plot the raw data. If Clean
+% is true, then it will clean the data and plot that as well.
+
+% These are some example parameters we can use..
+%Subject     = 'Pilot03';
+%Trial       = '2';
+%Joint_names = 'AE';
+%Type        = 'fwdSHRT';%'bwdLONG';
+%Plot        = 0;
+%Clean       = 1;
 
 Order = struct('A', 'Ankle', 'E', 'Elbow', 'H', 'Hip', 'K', 'Knee', 'N', 'Neck', 'S', 'Shoulder', 'T', 'Trunk');
 
@@ -29,37 +36,36 @@ time = Ankle(:,1);
 % Goddamn it program flow control is annoying in Matlab...
 include = '';
 leg = 'legend(';
-for i=Show,
-    include = [include eval(['Order.' i]) '(:,' Trial '+1) '];
-    leg = [leg '''' eval(['Order.' i]) ''', '];
+for i=Joint_names,
+  include = [include eval(['Order.' i]) '(:,' Trial '+1) '];
+  leg = [leg '''' eval(['Order.' i]) ''', '];
 end
 in = eval(['[' include ']']);
 leg = [leg(1:size(leg,2)-2) ');'];
+screen_size = get(0, 'ScreenSize');
 
 if Plot
-    screen_size = get(0, 'ScreenSize');
-    % Syntax for position is [xstart, ystart, width, height]. For some reason, it still overshoots...
-    figure('Name', ['SUBJECT: ', Subject, ' TRIAL: ', Trial, ' TYPE: ', Type], 'NumberTitle', 'off', 'Position', [4 screen_size(4)/3-75 2*screen_size(3)/3 2*screen_size(4)/3]);
+  % Syntax for position is [xstart, ystart, width, height]. For some reason, it still overshoots...
+  figure('Name', ['SUBJECT: ', Subject, ' TRIAL: ', Trial, ' TYPE: ', Type], ...
+	 'NumberTitle', 'off', ...
+	 'Position', [4 screen_size(4)/3-75 2*screen_size(3)/3 2*screen_size(4)/3]);
 
-    subplot(2,1,1);
-    plot(time, Platform(:,eval(Trial)+1)); legend('Platform Position');
-    subplot(2,1,2);
-    plot(time, in);
-    eval(leg);
+  subplot(2,1,1);
+  plot(time, in);
+  subplot(2,1,2);
+  plot(time, Platform(:,eval(Trial)+1)); legend('Platform Position');
+  eval(leg);
 end
 
-if IDSystem
-    % Create an iddata structure. Format is (output, input, sample time)
-    % This is goddamn convoluted. Take the trial+1'th row of *Platform* for
-    % output, take the trial+1'th row of Order.Ankle (etc) for input.
-    out  = Platform(:,eval(Trial)+1);
-    name = eval(['Order.' Show(1)]);
-    in   = eval([name '(:,' Trial '+1);']);
-    data = iddata(out, in, 1/150);
+if Clean
+  % Create an iddata structure. Format is (output, input, sample time)
+  % This is goddamn convoluted. Take the trial+1'th row of *Platform* for
+  % output, take the trial+1'th row of Order.Ankle (etc) for input.
+  in   = Platform(:,eval(Trial)+1);
+  name = eval(['Order.' Joint_names(1)]);
+  
+  data1 = clean_nan(Trial, Platform, eval(name));
     
-    % Try dealing with the NaN's using misdata...
-    data1 = misdata(data);
-    
-    figure('Name', ['Comparision of raw with misdata corrected for ' name], 'NumberTitle', 'off', 'Position', [550 screen_size(4)/3-75 2*screen_size(3)/3 2*screen_size(4)/3]);
-    plot(data1);
+  figure('Name', ['Comparision of raw with misdata corrected for ' name], 'NumberTitle', 'off', 'Position', [550 screen_size(4)/3-75 2*screen_size(3)/3 2*screen_size(4)/3]);
+  plot(time, data1);
 end
