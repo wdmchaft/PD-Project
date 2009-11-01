@@ -2,6 +2,9 @@
 % prompt
 % Input: Subject -> The subject to get the data from.
 %        Type    -> The type of experiment to load.
+%        Level   -> T/F whether to start the outputs around 0
+%        Clean   -> T/F remove any NaN's present
+%        Derive  -> T/F use the acceleration as input, rather than position
 
 % These are some example parameters we can use..
 
@@ -11,14 +14,11 @@ end
 if ~exist('Type')
   Type    = 'fwdSHRT';
 end
-if ~exist('Trial')
-  Trial   = 1;
-end
 if ~exist('Level')
-  Level   = 0;
+  Level   = 1;
 end
 if ~exist('Clean')
-  Clean   = 0;
+  Clean   = 1;
 end
 if ~exist('Derive')
   Derive  = 1;
@@ -42,18 +42,18 @@ if Level
   % Ignore the Platform for now, just do the angles (output)
   % fields = fieldnames(Joints); don't need this...
   for i = 2:length(fields)
-    a   = Joints.(fields{i});% a is the joint in question
+    name = fields{i};
+    a    = Joints.(name);% a is the joint in question
     
-    % If the first trial has a NaN in it, then use the start as the reference
-    if max(isnan(a(:,2)))
-      % Because hopefully the first 1/2 second won't have any NaNs
-      av = mean(a(1:75,2))
-    else
-      av = mean(a(:,2)); % Take mean of the first trial
-    end
+    % Zero input should yeild zero output. As the input happens at
+    % time 0, we need to centre all of the output *prior* to time 0
+    % about the 0 axis.
+    % We shouldn't have to worry about it having NaN's, which only
+    % crop up later
+    av = mean(a(1:75,2));
     
-    Joints.(fields{i})(:,2) = a(:,2) - av;   % Average the first field
-    off = mean(Joints.(fields{i})(1:75, 2)); % The average of the first 1/2s
+    Joints.(name)(:,2) = a(:,2) - av;   % Average the first field
+    off = mean(Joints.(name)(1:75, 2)); % The average of the first 1/2s
 
     % Make the first 1/2 second of every *other* trial line up with
     % the first 1/2 second of the *first* trial
@@ -62,7 +62,7 @@ if Level
       % 1/2 second line up
       av = off - mean(a(1:75, j));
       % Add this value to each trial.
-      Joints.(fields{i})(:,j) = a(:,j) + av;
+      Joints.(name)(:,j) = a(:,j) + av;
     end
   end
 end
@@ -111,5 +111,5 @@ for trial = 2:size(Joints.Platform, 2)
   end
 end
 
-['Loaded Subject ''' Subject ''' Type ''' Type ''' and put Trial #' ...
- num2str(Trial) ' inside the iddata structure ''Data''']
+['Loaded Subject ''' Subject ''' Type ''' Type ''' and put all of ' ...
+ 'the trials inside iddata structures inside ''Data''']
