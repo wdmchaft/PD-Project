@@ -14,8 +14,14 @@ end
 if ~exist('Trial')
   Trial   = 1;
 end
+if ~exist('Level')
+  Level   = 0;
+end
 if ~exist('Clean')
   Clean   = 0;
+end
+if ~exist('Derive')
+  Derive  = 1;
 end
 fields = {'Platform'; 'Ankle'; 'Elbow'; 'Hip'; 'Knee'; 'Neck'; ...
           'Shoulder'; 'Trunk'};
@@ -26,7 +32,7 @@ for i = 2:length(fields)
   Joints.(fields{i}) = load([Subject '\' Subject '_' fields{i} '_Angles_' Type '.txt']);
 end
 
-if Clean
+if Level
   % *Level* the first 1/2 second for all output - not detrend, not mean!
   % For all trials on a *given* *joint*, we want the first
   % half-second of data to have the *same* *average*. This is
@@ -59,26 +65,49 @@ if Clean
       Joints.(fields{i})(:,j) = a(:,j) + av;
     end
   end
-  
-  % Now, de-mean the platform data, too
+end
+
+if Clean || Derive
+  % Deriving things shrinks the dataset
+  Joints.PlatformAccel = zeros(size(Joints.Platform) - [2 0]);
   for i = 2:size(Joints.Platform, 2)
-    Joints.Platform(:,i) = Joints.Platform(:,i) - mean(Joints.Platform(:,i));
+    if Clean
+      % Now, de-mean the platform data, too
+      Joints.Platform(:,i) = Joints.Platform(:,i) - mean(Joints.Platform(:,i));
+    end
+    if Derive
+      d2 = diff(Joints.Platform(:,i), 2);
+      % Now we have to filter the results, because this currently
+      % looks horrible! Pass through a wide averager three tipes.
+      Joints.PlatformAccel(:,i) = smooth(smooth(smooth(d2)));
+    end
   end
 end
 
-% Now, create the data structure
-Data_in  = Joints.Platform(:,Trial+1);
-Data_out = [Joints.Ankle(:,Trial+1), Joints.Elbow(:,Trial+1), ...
-            Joints.Hip(:,Trial+1),   Joints.Knee(:,Trial+1), ...
-            Joints.Neck(:,Trial+1),  Joints.Shoulder(:,Trial+1), ...
-            Joints.Trunk(:,Trial+1)];
-
-Data = iddata(Data_out, Data_in, 1/150);
-
-if Clean % Then do some preprocessing on it
-  % Run it through the NaN-remover
-  if isnan(Data)
-    Data = misdata(Data);
+% Ok, let's stick all of the data into a series of iddata structures
+clear Data;
+for trial = 2:size(Joints.Platform, 2)
+  if Derive
+    % We have to resize everything else, because acceleration data
+    % is shorter by two data points.
+    in = Joints.PlatformAccel(:,trial);
+    out = [Joints.Ankle(1:end-2,trial), Joints.Elbow(1:end-2,trial), ...
+           Joints.Hip(1:end-2,trial),   Joints.Knee(1:end-2,trial), ...
+           Joints.Neck(1:end-2,trial),  Joints.Shoulder(1:end-2,trial), ...
+           Joints.Trunk(1:end-2,trial)];
+  else
+    in  = Joints.Platform(:,trial);
+    out = [Joints.Ankle(:,trial), Joints.Elbow(:,trial), ...
+           Joints.Hip(:,trial),   Joints.Knee(:,trial), ...
+           Joints.Neck(:,trial),  Joints.Shoulder(:,trial), ...
+           Joints.Trunk(:,trial)];
+  end
+  name = ['d' num2str(trial-1)]; % The name can't be pure numeric
+  Data.(name) = iddata(out, in , 1/150);
+  
+  % Do some more preprocessing as needed, to remove NaN's
+  if Clean && isnan(Data.(name))
+    Data.(name) = misdata(Data.(name));
   end
 end
 
